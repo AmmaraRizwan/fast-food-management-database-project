@@ -4,24 +4,40 @@ from mysql.connector import Error
 from datetime import datetime, date
 import hashlib
 import traceback
+import os
 
 app = Flask(__name__)
-app.secret_key = 'quickbite-secret-key-2024'
+app.secret_key = os.environ.get('SECRET_KEY', 'quickbite-secret-key-2024')
 
+# DATABASE CONFIGURATION - WORKS FOR BOTH LOCAL AND VERCEL
 DB_CONFIG = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': 'rkmsfeA@7',
-    'database': 'fastfood_db'
+    'host': os.environ.get('DB_HOST', 'localhost'),
+    'user': os.environ.get('DB_USER', 'root'),
+    'password': os.environ.get('DB_PASSWORD', 'rkmsfeA@7'),
+    'database': os.environ.get('DB_NAME', 'fastfood_db')
 }
 
 def get_db_connection():
-    """Create and return a database connection"""
+    """Create and return a database connection - Works on Vercel with cloud DB"""
     try:
-        connection = mysql.connector.connect(**DB_CONFIG)
+        # Add SSL config for cloud databases (PlanetScale, Railway, etc.)
+        config = DB_CONFIG.copy()
+        
+        # If not localhost, assume cloud database needs SSL
+        if config['host'] != 'localhost':
+            config['ssl_disabled'] = False
+            # For PlanetScale specifically
+            if 'psdb.cloud' in config['host']:
+                config['ssl_verify_cert'] = False
+                config['ssl_verify_identity'] = False
+        
+        connection = mysql.connector.connect(**config)
         return connection
     except Error as e:
         print(f"Error connecting to MySQL: {e}")
+        print(f"Host: {DB_CONFIG['host']}")
+        print(f"User: {DB_CONFIG['user']}")
+        print(f"Database: {DB_CONFIG['database']}")
         print(traceback.format_exc())
         return None
 
@@ -196,7 +212,6 @@ def get_orders():
         
         print(f"Fetched {len(orders)} orders")
         
-        # Convert date/time to string
         for order in orders:
             if 'created_at' in order and order['created_at']:
                 order['created_at'] = order['created_at'].strftime('%Y-%m-%d %H:%M:%S')
@@ -306,7 +321,6 @@ def get_stats():
         
         cursor = conn.cursor(dictionary=True)
         
-        # Query 1: Basic Statistics
         cursor.execute("SELECT COUNT(*) as total FROM orders")
         total_orders = cursor.fetchone()['total']
         
@@ -316,19 +330,15 @@ def get_stats():
         cursor.execute("SELECT COUNT(*) as total FROM reservations")
         total_reservations = cursor.fetchone()['total']
         
-        # Query 2: Average Order Value
         cursor.execute("SELECT AVG(total_price) as avg_value FROM orders WHERE status != 'cancelled'")
         avg_order_value = cursor.fetchone()['avg_value'] or 0
         
-        # Query 3: Today's Orders
         cursor.execute("SELECT COUNT(*) as today FROM orders WHERE order_date = CURDATE()")
         today_orders = cursor.fetchone()['today']
         
-        # Query 4: Pending Orders
         cursor.execute("SELECT COUNT(*) as pending FROM orders WHERE status = 'pending'")
         pending_orders = cursor.fetchone()['pending']
         
-        # Query 5: Top Customer (AGGREGATE + GROUPBY + ORDERBY)
         cursor.execute("""
             SELECT customer_name, COUNT(*) as order_count, SUM(total_price) as total_spent
             FROM orders
@@ -339,7 +349,6 @@ def get_stats():
         """)
         top_customer = cursor.fetchone()
         
-        # Query 6: Most Popular Category (JOIN + GROUPBY)
         cursor.execute("""
             SELECT category, COUNT(*) as sales_count
             FROM menu_items
@@ -349,7 +358,6 @@ def get_stats():
         """)
         popular_category = cursor.fetchone()
         
-        # Query 7: Peak Hour (SUBQUERY + AGGREGATE)
         cursor.execute("""
             SELECT HOUR(order_time) as peak_hour, COUNT(*) as order_count
             FROM orders
@@ -360,7 +368,6 @@ def get_stats():
         """)
         peak_hour = cursor.fetchone()
         
-        # Query 8: Most Reserved Table
         cursor.execute("""
             SELECT table_number, COUNT(*) as reservation_count
             FROM reservations
@@ -371,7 +378,6 @@ def get_stats():
         """)
         popular_table = cursor.fetchone()
         
-        # Query 9: Monthly Revenue Trend
         cursor.execute("""
             SELECT 
                 DATE_FORMAT(order_date, '%Y-%m') as month,
