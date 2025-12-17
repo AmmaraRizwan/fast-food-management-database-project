@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickBite - Fast Food Ordering</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    
+    <div id="loginPage" class="page active">
+        <div class="login-background"></div>
+        <div class="login-container">
+            <div class="login-box">
+    
+                <div class="login-form-wrapper">
+                    <div class="logo-container">
+                        <h1>QuickBite</h1>
+                        <p class="tagline">Your Favorite Fast Food, Delivered Fast!</p>
+                    </div>
+                
+                    <div id="loginFormSection">
+                        <div class="role-buttons">
+                            <button class="role-btn active" onclick="selectRole('customer')">
+                                <span class="role-icon">👤</span>
+                                <span>Customer</span>
+                            </button>
+                            <button class="role-btn" onclick="selectRole('admin')">
+                                <span class="role-icon">👨‍💼</span>
+                                <span>Admin</span>
+                            </button>
+                        </div>
+                        
+                        <form onsubmit="loginUser(event)">
+                            <div class="input-group">
+                                <span class="input-icon">👤</span>
+                                <input type="text" id="username" placeholder="Username" required>
+                            </div>
+                            <div class="input-group">
+                                <span class="input-icon">🔒</span>
+                                <input type="password" id="password" placeholder="Password" required>
+                            </div>
+                            <button type="submit" class="btn-main">
+                                <span>Login</span>
+                                <span class="btn-arrow">→</span>
+                            </button>
+                        </form>
+                        
+                        
+                        <div class="divider">
+                            <span>Don't have an account?</span>
+                        </div>
+                        
+                        <button class="btn-secondary" onclick="showRegisterForm()">
+                            <span>Create New Account</span>
+                            <span class="btn-icon">✨</span>
+                        </button>
+                    </div>
+
+                    <div id="registerFormSection" style="display:none;">
+                        <h2 class="register-title">Create Account ✨</h2>
+                        <form onsubmit="registerUser(event)">
+                            <div class="form-group">
+                                <label>👤 Username</label>
+                                <input type="text" id="regUsername" required placeholder="Choose a username" minlength="3">
+                                <small>At least 3 characters</small>
+                            </div>
+                            <div class="form-group">
+                                <label>🔒 Password</label>
+                                <input type="password" id="regPassword" required placeholder="Choose a password" minlength="6">
+                                <small>At least 6 characters</small>
+                            </div>
+                            <div class="form-group">
+                                <label>✅ Confirm Password</label>
+                                <input type="password" id="regConfirmPassword" required placeholder="Confirm password">
+                            </div>
+                            <button type="submit" class="btn-main">Register</button>
+                            <button type="button" class="btn-secondary" onclick="showLoginForm()">Back to Login</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="login-image-section">
+                    <div class="login-image-overlay">
+                        <h2>🍔 Delicious Fast Food</h2>
+                        <p>Burgers • Pizza • Drinks • More!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="customerSection" class="page">
+        
+        <div class="header">
+            <div class="header-left">
+                <span class="logo-small">🍔</span>
+                <h2>QuickBite</h2>
+            </div>
+            <div class="header-right">
+                <span class="welcome-text">Welcome, <strong id="userName"></strong></span>
+                <button class="cart-icon" onclick="goToPage('cartPage')">
+                    🛒 <span id="cartCount" class="cart-badge">0</span>
+                </button>
+                <button class="btn-logout" onclick="logout()">Logout</button>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="goToPage('homePage')">
+                <span class="tab-icon">🏠</span> Home
+            </button>
+            <button class="tab" onclick="goToPage('menuPage')">
+                <span class="tab-icon">📋</span> Menu
+            </button>
+            <button class="tab" onclick="goToPage('cartPage')">
+                <span class="tab-icon">🛒</span> Cart
+            </button>
+            <button class="tab" onclick="goToPage('reservationPage')">
+                <span class="tab-icon">📅</span> Reservation
+            </button>
+        </div>
+
+        <div id="messageBox" class="message-box"></div>
+
+        <div id="homePage" class="content-page active">
+            <div class="hero">
+                <div class="hero-content">
+                    <h1>Welcome to QuickBite! </h1>
+                    <p>Delicious fast food delivered to your door in 30 minutes or less</p>
+                    <button class="btn-hero" onclick="goToPage('menuPage')">
+                        Order Now
+                        <span class="hero-arrow">→</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">🍕</div>
+                    <h3>Fresh Food</h3>
+                    <p>Made with fresh ingredients daily</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🚀</div>
+                    <h3>Fast Delivery</h3>
+                    <p>30 minutes or less guaranteed</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">💰</div>
+                    <h3>Great Deals</h3>
+                    <p>Amazing combo offers</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="menuPage" class="content-page">
+            <h2 class="page-title">Our Delicious Menu 🍽️</h2>
+            
+            <h3 class="category-title">🍔 Burgers</h3>
+            <div class="menu-grid" id="burgersGrid"></div>
+            
+            <h3 class="category-title">🍕 Pizza</h3>
+            <div class="menu-grid" id="pizzaGrid"></div>
+            
+            <h3 class="category-title">🍟 Sides</h3>
+            <div class="menu-grid" id="sidesGrid"></div>
+            
+            <h3 class="category-title">🥤 Drinks</h3>
+            <div class="menu-grid" id="drinksGrid"></div>
+            
+            <h3 class="category-title">🎉 Special Combos</h3>
+            <div class="menu-grid" id="combosGrid"></div>
+        </div>
+
+        <div id="cartPage" class="content-page">
+            <h2 class="page-title">Your Cart 🛒</h2>
+            
+            <div class="cart-container">
+                <div id="cartItems" class="cart-items"></div>
+                
+                <div class="cart-summary">
+                    <div class="summary-row">
+                        <span>Subtotal:</span>
+                        <span>Rs.<span id="subtotal">0.00</span></span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Tax (8%):</span>
+                        <span>Rs.<span id="tax">0.00</span></span>
+                    </div>
+                    <div class="summary-row total-row">
+                        <span><strong>Total:</strong></span>
+                        <span><strong>Rs.<span id="totalAmount">0.00</span></strong></span>
+                    </div>
+                </div>
+                
+                <div class="cart-buttons">
+                    <button class="btn-success" onclick="placeOrder()">
+                        <span class="btn-icon">✅</span>
+                        Place Order
+                    </button>
+                    <button class="btn-danger" onclick="clearCart()">
+                        <span class="btn-icon">🗑️</span>
+                        Clear Cart
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="reservationPage" class="content-page">
+            <h2 class="page-title">Reserve a Table 📅</h2>
+            
+            <div class="reservation-container">
+                <form class="reservation-form" onsubmit="makeReservation(event)">
+                    <div class="form-group">
+                        <label>👤 Full Name</label>
+                        <input type="text" id="resName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>📞 Phone Number</label>
+                        <input type="tel" id="resPhone" required pattern="[0-9+()-]{10,15}">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>🪑 Table Number (1-20)</label>
+                            <input type="number" id="tableNum" min="1" max="20" required>
+                        </div>
+                        <div class="form-group">
+                            <label>👥 Number of Guests</label>
+                            <input type="number" id="guestCount" min="1" max="10" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>📅 Date</label>
+                            <input type="date" id="resDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>🕐 Time</label>
+                            <input type="time" id="resTime" required>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn-main">
+                        <span class="btn-icon">✨</span>
+                        Reserve Table
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="adminSection" class="page">
+        
+        <div class="header">
+            <div class="header-left">
+                <span class="logo-small">👨‍💼</span>
+                <h2>Admin Dashboard</h2>
+            </div>
+            <button class="btn-logout" onclick="logout()">Logout</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card orders-card">
+                <div class="stat-icon">📦</div>
+                <div class="stat-info">
+                    <h3 id="totalOrders">0</h3>
+                    <p>Total Orders</p>
+                </div>
+            </div>
+            <div class="stat-card reservations-card">
+                <div class="stat-icon">📅</div>
+                <div class="stat-info">
+                    <h3 id="totalReservations">0</h3>
+                    <p>Reservations</p>
+                </div>
+            </div>
+            <div class="stat-card revenue-card">
+                <div class="stat-icon">💰</div>
+                <div class="stat-info">
+                    <h3 id="totalRevenue">Rs.0</h3>
+                    <p>Total Revenue</p>
+                </div>
+            </div>
+            <div class="stat-card avg-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-info">
+                    <h3 id="avgOrderValue">Rs.0</h3>
+                    <p>Avg Order Value</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-insights">
+            <div class="insight-card">
+                <h4>🏆 Top Customer</h4>
+                <p id="topCustomer">Loading...</p>
+            </div>
+            <div class="insight-card">
+                <h4>🔥 Popular Category</h4>
+                <p id="popularCategory">Loading...</p>
+            </div>
+            <div class="insight-card">
+                <h4>⏰ Peak Hour</h4>
+                <p id="peakHour">Loading...</p>
+            </div>
+            <div class="insight-card">
+                <h4>🪑 Most Reserved Table</h4>
+                <p id="popularTable">Loading...</p>
+            </div>
+        </div>
+
+        <div class="admin-section">
+            <h3>📦 Recent Orders</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTable">
+                        <tr>
+                            <td colspan="6" style="text-align:center; padding:20px;">Loading orders...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="admin-section">
+            <h3>📅 Table Reservations</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Res. ID</th>
+                            <th>Customer</th>
+                            <th>Phone</th>
+                            <th>Table</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Guests</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reservationsTable">
+                        <tr>
+                            <td colspan="7" style="text-align:center; padding:20px;">Loading reservations...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
